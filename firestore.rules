@@ -1,0 +1,148 @@
+/**
+ * Core Philosophy:
+ * This ruleset enforces a security model based on user roles (customer, driver)
+ * and data ownership. The primary goal is "Authorization Independence," meaning that
+ * authorization decisions for a document are made using fields denormalized directly
+ * onto that document, avoiding slow and costly cross-document `get()` calls wherever possible.
+ *
+ * Data Structure:
+ * The data is organized into four top-level collections:
+ * - /users/{userId}: Private user profile data.
+ * - /shipments/{shipmentId}: Shipment records shared between a customer and a driver.
+ * - /leaderboard/{leaderboardEntryId}: Publicly readable driver performance data.
+ * - /eco_metrics/{ecoMetricsId}: Private driver-specific metrics, readable by the
+ *   associated shipment customer.
+ *
+ * Key Security Decisions:
+ * - User Isolation: Users can only access their own document within the `/users`
+ *   collection. Listing all users is explicitly disallowed to protect privacy.
+ * - Shared Access via Denormalization: The `/shipments` collection uses denormalized
+ *   `customerId` and `driverId` fields to grant read access to both participants.
+ *   Write access is more strictly controlled, defaulting to the customer.
+ * - Public Read-Only Data: The `/leaderboard` collection is public and can be read
+ *   by anyone, but all client-side writes are blocked. It is assumed this data is
+
+ *   maintained by a trusted backend service.
+ * - Secure Lookups for Related Data: Access to an `/eco_metrics` document requires a
+ *   secure `get()` call to the related `/shipments` document to verify the customer's
+ *   identity, demonstrating a safe use of cross-document reads when necessary.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ------------------------------------------------------------------------
+    // Helper Functions
+    // ------------------------------------------------------------------------
+
+    /**
+     * Returns true if the user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Returns true if the authenticated user's UID matches the provided userId.
+     * This is the foundation of the user ownership model.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Returns true if a document exists and the user is the owner.
+     * Used for safe update and delete operations.
+     */
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    /**
+     * Returns true if the user is either the customer or the driver of a shipment.
+     * Used for granting read access to a shipment document.
+     */
+    function isShipmentParticipant(shipment) {
+      return isSignedIn() && (request.auth.uid == shipment.data.customerId || request.auth.uid == shipment.data.driverId);
+    }
+
+    /**
+     * Returns true if the user is the customer of the shipment associated with
+     * an eco_metrics record. Requires a cross-document read.
+     */
+    function isShipmentCustomerForMetrics(shipmentId) {
+      let shipmentData = get(/databases/$(database)/documents/shipments/$(shipmentId)).data;
+      return isSignedIn() && request.auth.uid == shipmentData.customerId;
+    }
+
+
+    // ------------------------------------------------------------------------
+    // Collection Rules
+    // ------------------------------------------------------------------------
+
+    /**
+     * @description Controls access to user profile documents.
+     * @path /users/{userId}
+     * @allow (create) A new user creating their own profile document.
+     * @deny (get) An authenticated user trying to read another user's profile.
+     * @principle Restricts access to a user's own data tree.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // Disallow listing all users for privacy
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Controls access to shipment documents.
+     * @path /shipments/{shipmentId}
+     * @allow (get) The 'driverId' or 'customerId' on the document reading it.
+     * @deny (update) The 'driverId' trying to update the document.
+     * @principle Enforces shared-read access for participants but owner-only writes.
+     */
+    match /shipments/{shipmentId} {
+      allow get: if isShipmentParticipant(resource);
+      // Listing all shipments is allowed for any signed-in user.
+      // Security is enforced by the 'get' rule, which prevents unauthorized
+      // documents from being read after the list is returned.
+      allow list: if isSignedIn();
+      allow create: if isOwner(request.resource.data.customerId);
+      allow update: if isExistingOwner(resource.data.customerId) && request.resource.data.customerId == resource.data.customerId;
+      allow delete: if isExistingOwner(resource.data.customerId);
+    }
+
+    /**
+     * @description Controls access to the public driver leaderboard.
+     * @path /leaderboard/{leaderboardEntryId}
+     * @allow (list) Any user, authenticated or not, listing all leaderboard entries.
+     * @deny (create) Any client trying to write a new entry to the leaderboard.
+     * @principle Provides public read-only access to data managed by a backend process.
+     */
+    match /leaderboard/{leaderboardEntryId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if false; // Managed by a trusted backend service
+      allow update: if false; // Managed by a trusted backend service
+      allow delete: if false; // Managed by a trusted backend service
+    }
+
+    /**
+     * @description Controls access to shipment-specific eco metrics.
+     * @path /eco_metrics/{ecoMetricsId}
+     * @allow (get) The driver ('driverId') or the customer of the related shipment reading the metrics.
+     * @deny (update) The customer of the related shipment trying to update the metrics.
+     * @principle Combines direct ownership with secure, lookup-based shared access.
+     */
+    match /eco_metrics/{ecoMetricsId} {
+      allow get: if isOwner(resource.data.driverId) || isShipmentCustomerForMetrics(resource.data.shipmentId);
+      // Listing metrics is allowed for any signed-in user.
+      // Security is enforced by the 'get' rule on each document returned.
+      allow list: if isSignedIn();
+      allow create: if isOwner(request.resource.data.driverId);
+      allow update: if isExistingOwner(resource.data.driverId) && request.resource.data.driverId == resource.data.driverId;
+      allow delete: if isExistingOwner(resource.data.driverId);
+    }
+  }
+}

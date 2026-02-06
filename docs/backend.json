@@ -1,0 +1,232 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the ZYRH platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user.",
+          "format": "uuid"
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address.",
+          "format": "email"
+        },
+        "name": {
+          "type": "string",
+          "description": "User's full name."
+        },
+        "role": {
+          "type": "string",
+          "description": "User's role in the system (e.g., customer, driver)."
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "name",
+        "role"
+      ]
+    },
+    "Shipment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Shipment",
+      "type": "object",
+      "description": "Represents a shipment being tracked by the ZYRH platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the shipment."
+        },
+        "customerId": {
+          "type": "string",
+          "description": "Reference to User (Customer). (Relationship: User 1:N Shipment)"
+        },
+        "driverId": {
+          "type": "string",
+          "description": "Reference to User (Driver). (Relationship: User 1:N Shipment)"
+        },
+        "pickupAddress": {
+          "type": "string",
+          "description": "Pickup address for the shipment."
+        },
+        "deliveryAddress": {
+          "type": "string",
+          "description": "Delivery address for the shipment."
+        },
+        "status": {
+          "type": "string",
+          "description": "Current status of the shipment (e.g., pending, in transit, delivered)."
+        },
+        "estimatedDeliveryTime": {
+          "type": "string",
+          "description": "Estimated delivery time for the shipment.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "customerId",
+        "driverId",
+        "pickupAddress",
+        "deliveryAddress",
+        "status",
+        "estimatedDeliveryTime"
+      ]
+    },
+    "LeaderboardEntry": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "LeaderboardEntry",
+      "type": "object",
+      "description": "Represents an entry on the driver leaderboard.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the leaderboard entry."
+        },
+        "driverId": {
+          "type": "string",
+          "description": "Reference to User (Driver). (Relationship: User 1:N LeaderboardEntry)"
+        },
+        "ecoScore": {
+          "type": "number",
+          "description": "Driver's EcoScore."
+        },
+        "co2Reduction": {
+          "type": "number",
+          "description": "Driver's total CO2 reduction."
+        },
+        "ranking": {
+          "type": "number",
+          "description": "Driver's ranking on the leaderboard."
+        }
+      },
+      "required": [
+        "id",
+        "driverId",
+        "ecoScore",
+        "co2Reduction",
+        "ranking"
+      ]
+    },
+    "EcoMetrics": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "EcoMetrics",
+      "type": "object",
+      "description": "Stores fuel and emission predictions.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the eco metrics record."
+        },
+        "driverId": {
+          "type": "string",
+          "description": "Reference to User (Driver). (Relationship: User 1:N EcoMetrics)"
+        },
+        "shipmentId": {
+          "type": "string",
+          "description": "Reference to Shipment. (Relationship: Shipment 1:N EcoMetrics)"
+        },
+        "fuelConsumption": {
+          "type": "number",
+          "description": "Predicted fuel consumption for the shipment."
+        },
+        "emission": {
+          "type": "number",
+          "description": "Predicted CO2 emission for the shipment."
+        },
+        "routeOptimizationData": {
+          "type": "string",
+          "description": "Detailed route optimization data in JSON format."
+        }
+      },
+      "required": [
+        "id",
+        "driverId",
+        "shipmentId",
+        "fuelConsumption",
+        "emission",
+        "routeOptimizationData"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information. Path-based ownership: only the user (or an admin) can access the document.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/shipments/{shipmentId}",
+        "definition": {
+          "entityName": "Shipment",
+          "schema": {
+            "$ref": "#/backend/entities/Shipment"
+          },
+          "description": "Stores shipment data. Includes denormalized 'customerId' and 'driverId' for authorization independence.",
+          "params": [
+            {
+              "name": "shipmentId",
+              "description": "The unique identifier of the shipment."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/leaderboard/{leaderboardEntryId}",
+        "definition": {
+          "entityName": "LeaderboardEntry",
+          "schema": {
+            "$ref": "#/backend/entities/LeaderboardEntry"
+          },
+          "description": "Stores leaderboard entries for drivers. Includes DriverId for authorization.",
+          "params": [
+            {
+              "name": "leaderboardEntryId",
+              "description": "The unique identifier of the leaderboard entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/eco_metrics/{ecoMetricsId}",
+        "definition": {
+          "entityName": "EcoMetrics",
+          "schema": {
+            "$ref": "#/backend/entities/EcoMetrics"
+          },
+          "description": "Stores EcoMetrics data related to a shipment. Includes DriverId and ShipmentId for authorization.",
+          "params": [
+            {
+              "name": "ecoMetricsId",
+              "description": "The unique identifier of the eco metrics record."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to support the ZYRH application's requirements for shipment tracking, eco-route optimization, and driver gamification. The core principle is Authorization Independence, achieved through denormalization of authorization data where necessary. This allows for robust security rules without relying on complex `get()` operations. Segregation is used to ensure that different types of data (e.g., user profiles, shipment data, leaderboard entries) are stored in separate collections with tailored security rules. The structure leverages path-based ownership for user-related data and membership maps for collaborative scenarios.\n\nSpecifically:\n\n*   **Users:** User data is stored in `/users/{userId}`. This is a path-based ownership model, ensuring that only the user or admins can access their profile.\n*   **Shipments:** Shipments are stored in `/shipments/{shipmentId}`. To ensure Authorization Independence, `customerId` and `driverId` are included in each shipment document, allowing security rules to validate access based on these roles without needing to read user documents.\n*   **Leaderboard:** Leaderboard entries are stored in `/leaderboard/{leaderboardEntryId}`.  DriverId is present, providing a direct reference for validating access based on the driver associated with the entry.\n*   **EcoMetrics:** EcoMetrics are stored in `/eco_metrics/{ecoMetricsId}`. DriverId and ShipmentId are present, providing a direct reference for validating access based on the driver or shipment associated with the entry.\n\nThis structure supports the QAPs by:\n\n*   **Secure List Operations:**  Each collection can have rules that limit `list` access based on roles and ownership. For example, only admins might be able to list all shipments, while customers can only list their own shipments.\n*   **Atomic Operations:** The denormalization strategy eliminates the need for `get()` calls in security rules, allowing for atomic batch operations or transactions.\n*   **Debuggability:** The explicit structure and naming conventions make it easy to understand and debug security rules. Intent is clear from the paths and data structure."
+  }
+}
