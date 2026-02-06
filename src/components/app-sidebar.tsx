@@ -18,10 +18,20 @@ import {
   Map,
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useAuth } from '@/firebase';
+import { signOut } from 'firebase/auth';
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const auth = useAuth();
+  const router = useRouter();
+
+  const handleSignOut = () => {
+    signOut(auth).then(() => {
+      router.push('/');
+    });
+  };
 
   const menuItems = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -67,11 +77,9 @@ export function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip={{children: "Log Out", side: "right", align: "center"}}>
-              <Link href="/">
-                <LogOut />
-                <span>Log Out</span>
-              </Link>
+            <SidebarMenuButton onClick={handleSignOut} tooltip={{children: "Log Out", side: "right", align: "center"}}>
+              <LogOut />
+              <span>Log Out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
