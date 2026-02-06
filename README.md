@@ -81,6 +81,8 @@ Dialogflow (for intelligent user queries)
 
 System Architecture
 EcoGo follows a modular microservices architecture to ensure scalability and flexibility.
+
+
 🔹 Data Input Layer
 Real-time data collected from:
 Google Maps API
@@ -118,6 +120,7 @@ Lack of sustainability tracking
 
 EcoGo addresses these challenges by integrating AI, optimization algorithms, and real-time data intelligence into a unified eco-routing platform.
 
+
 🌍 Impact
 Reduced fuel costs
 Lower carbon emissions
@@ -125,12 +128,14 @@ Increased transparency
 Sustainable fleet management
 ESG compliance readiness
 
+
 🔮 Future Enhancements
 EV fleet integration
 Carbon credit tracking
 Predictive maintenance insights
 Advanced AI-based traffic forecasting
 Multi-modal logistics optimization
+
 
 📊 Vision
 To transform logistics into a data-driven, environmentally responsible ecosystem that balances operational efficiency with climate sustainability.
