@@ -26,7 +26,7 @@ const OptimizeDeliveryRouteForFuelEfficiencyOutputSchema = z.object({
     .number()
     .describe('Estimated carbon footprint for the optimized route (in kg of CO2).'),
   travelTimeEstimate: z.number().describe('Estimated travel time for the optimized route (in minutes).'),
-  route justification: z
+  routeJustification: z
     .string()
     .describe('Justification of why the route was selected in terms of fuel efficiency and emissions'),
 });

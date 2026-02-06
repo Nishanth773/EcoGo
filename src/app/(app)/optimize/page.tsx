@@ -130,7 +130,7 @@ export default function OptimizePage() {
           <CardContent className="space-y-6">
             <div>
               <Label className="text-xs font-semibold uppercase text-muted-foreground">Route Justification</Label>
-              <p className="mt-1 text-sm">{state.data['route justification']}</p>
+              <p className="mt-1 text-sm">{state.data.routeJustification}</p>
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <StatCard icon={RouteIcon} label="Optimized Route" value={state.data.optimizedRoute} />
