@@ -14,10 +14,9 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Leaf } from 'lucide-react';
 import { useFormStatus } from 'react-dom';
-import { useActionState, useEffect, useRef } from 'react';
+import { useActionState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth, useUser } from '@/firebase';
-import { initiateEmailSignIn } from '@/firebase/non-blocking-login';
+import { useAuth, useUser, initiateEmailSignIn, initiateGoogleSignIn } from '@/firebase';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Terminal } from 'lucide-react';
 
@@ -30,6 +29,16 @@ function LoginButton() {
   );
 }
 
+function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <title>Google</title>
+      <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.02 1.02-2.62 1.62-4.55 1.62-3.83 0-6.94-2.97-6.94-6.94s3.11-6.94 6.94-6.94c2.21 0 3.64.88 4.5 1.72l2.5-2.5C18.66 3.12 15.98 2 12.48 2 7.18 2 3 6.18 3 11.48s4.18 9.48 9.48 9.48c2.92 0 5.17-1 6.84-2.63 1.72-1.67 2.36-4.02 2.36-6.18 0-.82-.07-1.42-.18-1.84H12.48z" />
+    </svg>
+  );
+}
+
+
 type FormState = {
   error: string | null;
 };
@@ -38,7 +47,6 @@ export function LoginForm() {
   const router = useRouter();
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
-  const formRef = useRef<HTMLFormElement>(null);
 
   const [state, formAction] = useActionState(async (prevState: FormState, formData: FormData) => {
     const email = formData.get('email') as string;
@@ -57,28 +65,10 @@ export function LoginForm() {
       router.push('/dashboard');
     }
   }, [user, router]);
-
-
-  // Effect to handle Firebase auth errors (e.g., wrong password)
-  // This is a simplified example. In a real app, you'd listen for specific error codes.
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (!user && formRef.current) {
-        // This is a proxy for a failed login attempt.
-        // A more robust solution would involve checking auth error codes.
-        // For this demo, we'll assume any state change back to null after trying is a failure.
-        // @ts-ignore
-        if (formRef.current.elements.email.value) {
-            // A simple way to show an error without complex state management
-            // In a real app, you would have a more robust error handling mechanism.
-            console.log("Login failed");
-        }
-      }
-    });
-
-    return () => unsubscribe();
-  }, [auth]);
-
+  
+  const handleGoogleSignIn = () => {
+    initiateGoogleSignIn(auth);
+  };
 
   if (isUserLoading || user) {
     return (
@@ -90,7 +80,7 @@ export function LoginForm() {
 
   return (
     <Card className="w-full max-w-sm shadow-2xl">
-      <form ref={formRef} action={formAction}>
+      <form action={formAction}>
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Leaf className="w-10 h-10 text-primary" />
@@ -123,6 +113,20 @@ export function LoginForm() {
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <LoginButton />
+          <div className="relative w-full">
+            <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                    Or continue with
+                </span>
+            </div>
+          </div>
+          <Button variant="outline" className="w-full" type="button" onClick={handleGoogleSignIn}>
+            <GoogleIcon className="mr-2 h-4 w-4" />
+            Sign in with Google
+          </Button>
           <div className="text-sm text-center text-muted-foreground">
             Don&apos;t have an account?{' '}
             <Link href="#" className="underline text-accent-foreground hover:text-primary">
