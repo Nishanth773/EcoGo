@@ -14,13 +14,13 @@ const MapComponent = () => {
   const position = { lat: 53.54, lng: 10 };
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-  if (!apiKey) {
+  if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
     return (
       <Alert variant="destructive">
         <Terminal className="h-4 w-4" />
-        <AlertTitle>API Key Missing</AlertTitle>
+        <AlertTitle>API Key Missing or Invalid</AlertTitle>
         <AlertDescription>
-          Google Maps API Key is missing. Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env file.
+          Your Google Maps API Key is missing or invalid. Please get a valid API key from the Google Cloud Console and add it to your .env file as NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.
         </AlertDescription>
       </Alert>
     );
