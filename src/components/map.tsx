@@ -7,14 +7,14 @@ import { Truck, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const MapComponent = () => {
-  const center: [number, number] = [39.8283, -98.5795]; // Center of US
+  const center: [number, number] = [11.1271, 78.6569]; // Center of Tamil Nadu
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(
     null
   );
 
   return (
     <div className="rounded-lg border h-[60vh] w-full overflow-hidden">
-      <Map defaultCenter={center} defaultZoom={4}>
+      <Map defaultCenter={center} defaultZoom={7}>
         {shipmentsData.map((shipment) => (
           <Marker
             key={shipment.id}

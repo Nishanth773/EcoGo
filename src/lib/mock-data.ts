@@ -18,9 +18,9 @@ export type Shipment = {
 };
 
 export const shipmentsData: Shipment[] = [
-  { id: 'ECO-001', status: 'In Transit', origin: 'New York, NY', destination: 'Los Angeles, CA', eta: 'In 2 days', location: [40.7128, -74.0060] },
-  { id: 'ECO-002', status: 'Delivered', origin: 'Chicago, IL', destination: 'Houston, TX', eta: 'Completed', location: [29.7604, -95.3698] },
-  { id: 'ECO-003', status: 'Pending', origin: 'Miami, FL', destination: 'Seattle, WA', eta: 'N/A', location: [25.7617, -80.1918] },
-  { id: 'ECO-004', status: 'In Transit', origin: 'Denver, CO', destination: 'Boston, MA', eta: 'Tomorrow', location: [39.7392, -104.9903] },
-  { id: 'ECO-005', status: 'Delayed', origin: 'Phoenix, AZ', destination: 'Atlanta, GA', eta: 'In 3 days', location: [33.4484, -112.0740] },
+  { id: 'ECO-001', status: 'In Transit', origin: 'Chennai', destination: 'Coimbatore', eta: 'In 2 hours', location: [13.0827, 80.2707] },
+  { id: 'ECO-002', status: 'Delivered', origin: 'Madurai', destination: 'Tiruchirappalli', eta: 'Completed', location: [9.9252, 78.1198] },
+  { id: 'ECO-003', status: 'Pending', origin: 'Salem', destination: 'Erode', eta: 'N/A', location: [11.6643, 78.1460] },
+  { id: 'ECO-004', status: 'In Transit', origin: 'Tirunelveli', destination: 'Vellore', eta: 'Tomorrow', location: [8.7139, 77.7567] },
+  { id: 'ECO-005', status: 'Delayed', origin: 'Thoothukudi', destination: 'Nagercoil', eta: 'In 3 hours', location: [8.7642, 78.1348] },
 ];
