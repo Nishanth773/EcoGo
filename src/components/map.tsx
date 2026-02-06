@@ -1,23 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  APIProvider,
-  Map,
-  AdvancedMarker,
-  InfoWindow,
-  Pin,
-} from '@vis.gl/react-google-maps';
+import { Map, Marker, Overlay } from 'pigeon-maps';
 import { shipmentsData, type Shipment } from '@/lib/mock-data';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Code } from 'lucide-react';
+import { Code, Truck, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const MapComponent = () => {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-  const center = { lat: 39.8283, lng: -98.5795 }; // Center of US
+  const apiKey = process.env.NEXT_PUBLIC_LOCATIONIQ_API_KEY;
+  const center: [number, number] = [39.8283, -98.5795]; // Center of US
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(
     null
   );
+
+  const locationIQProvider = (x: number, y: number, z: number) => {
+    return `https://a.tile.locationiq.com/v3/streets/r/${z}/${x}/${y}.png?key=${apiKey}`;
+  };
 
   if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
     return (
@@ -28,19 +27,19 @@ const MapComponent = () => {
         <CardContent className="space-y-4">
           <p>
             The interactive map is currently disabled. To enable it, you need to
-            provide a Google Maps API key.
+            provide a LocationIQ API key.
           </p>
           <div className="p-4 rounded-md bg-muted text-sm font-mono text-left space-y-2">
             <p>
-              1. Get an API key from the Google Cloud Console:
+              1. Get a free API key from LocationIQ:
               <br />
               <a
-                href="https://console.cloud.google.com/google/maps-apis/overview"
+                href="https://locationiq.com/register"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary underline"
               >
-                https://console.cloud.google.com/google/maps-apis/overview
+                https://locationiq.com/register
               </a>
             </p>
             <p>
@@ -49,7 +48,7 @@ const MapComponent = () => {
             <p>3. Add the following line to your .env file, replacing "YOUR_API_KEY_HERE":</p>
             <div className="p-2 bg-background rounded flex items-center gap-2">
               <Code className="w-4 h-4" />
-              <span>NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="YOUR_API_KEY"</span>
+              <span>NEXT_PUBLIC_LOCATIONIQ_API_KEY="YOUR_API_KEY"</span>
             </div>
           </div>
           <p>
@@ -63,48 +62,40 @@ const MapComponent = () => {
 
   return (
     <div className="rounded-lg border h-[60vh] w-full overflow-hidden">
-      <APIProvider apiKey={apiKey}>
-        <Map
-          defaultCenter={center}
-          defaultZoom={4}
-          mapId="ecogo-map"
-          gestureHandling={'greedy'}
-          disableDefaultUI={true}
-        >
-          {shipmentsData.map((shipment) => (
-            <AdvancedMarker
-              key={shipment.id}
-              position={{ lat: shipment.location[0], lng: shipment.location[1] }}
-              onClick={() => setSelectedShipment(shipment)}
-            >
-              <Pin
-                background={'hsl(var(--primary))'}
-                borderColor={'hsl(var(--primary))'}
-                glyphColor={'hsl(var(--primary-foreground))'}
-              />
-            </AdvancedMarker>
-          ))}
+      <Map
+        provider={locationIQProvider}
+        defaultCenter={center}
+        defaultZoom={4}
+      >
+        {shipmentsData.map((shipment) => (
+          <Marker
+            key={shipment.id}
+            anchor={shipment.location}
+            onClick={() => setSelectedShipment(shipment)}
+            width={40}
+          >
+             <Truck className="w-8 h-8 text-primary -translate-x-1/2 -translate-y-1/2" />
+          </Marker>
+        ))}
 
-          {selectedShipment && (
-            <InfoWindow
-              position={{
-                lat: selectedShipment.location[0],
-                lng: selectedShipment.location[1],
-              }}
-              onCloseClick={() => setSelectedShipment(null)}
-              pixelOffset={[0, -40]}
-            >
-              <div className="p-2 space-y-1 text-sm">
+        {selectedShipment && (
+          <Overlay anchor={selectedShipment.location} offset={[0, -30]}>
+            <div className="p-4 space-y-1 text-sm bg-card rounded-lg shadow-lg border w-64">
+              <div className="flex justify-between items-start">
                 <div className="font-bold text-base">{selectedShipment.id}</div>
-                <div>Status: {selectedShipment.status}</div>
-                <div>From: {selectedShipment.origin}</div>
-                <div>To: {selectedShipment.destination}</div>
-                <div>ETA: {selectedShipment.eta}</div>
+                <Button variant="ghost" size="icon" className="h-6 w-6 -mr-2 -mt-2" onClick={() => setSelectedShipment(null)}>
+                  <X className="w-4 h-4" />
+                  <span className="sr-only">Close</span>
+                </Button>
               </div>
-            </InfoWindow>
-          )}
-        </Map>
-      </APIProvider>
+              <div>Status: {selectedShipment.status}</div>
+              <div>From: {selectedShipment.origin}</div>
+              <div>To: {selectedShipment.destination}</div>
+              <div>ETA: {selectedShipment.eta}</div>
+            </div>
+          </Overlay>
+        )}
+      </Map>
     </div>
   );
 };
