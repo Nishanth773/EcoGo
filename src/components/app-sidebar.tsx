@@ -15,6 +15,7 @@ import {
   Leaf,
   Settings,
   LogOut,
+  Map,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -26,6 +27,7 @@ export function AppSidebar() {
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/optimize', label: 'Optimize Route', icon: Route },
     { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
+    { href: '/map', label: 'Live Map', icon: Map },
   ];
 
   return (
