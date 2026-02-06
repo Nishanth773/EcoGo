@@ -14,11 +14,12 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Leaf } from 'lucide-react';
 import { useFormStatus } from 'react-dom';
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth, useUser, initiateEmailSignIn, initiateGoogleSignIn } from '@/firebase';
+import { useAuth, useUser, initiateEmailSignIn } from '@/firebase';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Terminal } from 'lucide-react';
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
 function LoginButton() {
   const { pending } = useFormStatus();
@@ -47,6 +48,7 @@ export function LoginForm() {
   const router = useRouter();
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
+  const [googleError, setGoogleError] = useState<string | null>(null);
 
   const [state, formAction] = useActionState(async (prevState: FormState, formData: FormData) => {
     const email = formData.get('email') as string;
@@ -67,7 +69,17 @@ export function LoginForm() {
   }, [user, router]);
   
   const handleGoogleSignIn = () => {
-    initiateGoogleSignIn(auth);
+    setGoogleError(null);
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider)
+      .catch((error) => {
+        if (error.code === 'auth/operation-not-allowed') {
+          setGoogleError("Google Sign-In is not enabled. Please enable it in your Firebase project's console.");
+        } else {
+          console.error("Google Sign-In Error:", error);
+          setGoogleError(error.message || "An unknown error occurred during Google Sign-In.");
+        }
+      });
   };
 
   if (isUserLoading || user) {
@@ -90,11 +102,11 @@ export function LoginForm() {
           <CardDescription>Enter your credentials to access your dashboard.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-           {state?.error && (
+           {(state?.error || googleError) && (
               <Alert variant="destructive">
                 <Terminal className="h-4 w-4" />
                 <AlertTitle>Authentication Error</AlertTitle>
-                <AlertDescription>{state.error}</AlertDescription>
+                <AlertDescription>{state?.error || googleError}</AlertDescription>
               </Alert>
             )}
           <div className="space-y-2">
