@@ -14,7 +14,7 @@ export default function MapPage() {
         <CardHeader>
           <CardTitle>Fleet Location</CardTitle>
           <CardDescription>
-            This is a demonstration of a live map view.
+            A preview of the fleet map is shown below. Add an API key for live data.
           </CardDescription>
         </CardHeader>
         <CardContent>

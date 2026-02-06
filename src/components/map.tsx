@@ -1,52 +1,50 @@
 'use client';
 
-import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
+import Image from 'next/image';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Terminal, Truck } from 'lucide-react';
-
-const truckLocations = [
-  { lat: 53.5511, lng: 9.9937, key: 'truck1', name: 'Truck 1' },
-  { lat: 53.546, lng: 10.012, key: 'truck2', name: 'Truck 2' },
-  { lat: 53.56, lng: 9.95, key: 'truck3', name: 'Truck 3' },
-];
+import { Terminal } from 'lucide-react';
 
 const MapComponent = () => {
-  const position = { lat: 53.54, lng: 10 };
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const mapImage = PlaceHolderImages.find((p) => p.id === 'static-map');
 
-  if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
+  if (!mapImage) {
     return (
       <Alert variant="destructive">
         <Terminal className="h-4 w-4" />
-        <AlertTitle>API Key Missing or Invalid</AlertTitle>
+        <AlertTitle>Map Image Not Found</AlertTitle>
         <AlertDescription>
-          Your Google Maps API Key is missing or invalid. Please get a valid API key from the Google Cloud Console and add it to your .env file as NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.
+          The placeholder image for the map could not be found. Please check
+          the placeholder image configuration.
         </AlertDescription>
       </Alert>
     );
   }
 
   return (
-    <APIProvider apiKey={apiKey}>
-      <div style={{ height: '60vh', width: '100%' }} className="rounded-lg overflow-hidden border">
-        <Map
-          defaultCenter={position}
-          defaultZoom={11}
-          gestureHandling={'greedy'}
-          disableDefaultUI={false}
-          mapId="e523f83141f956c2"
-          keyboardShortcuts={true}
-        >
-          {truckLocations.map((truck) => (
-            <AdvancedMarker key={truck.key} position={truck} title={truck.name}>
-              <div className="p-2 bg-primary rounded-full shadow-lg">
-                <Truck className="h-6 w-6 text-primary-foreground" />
-              </div>
-            </AdvancedMarker>
-          ))}
-        </Map>
+    <div
+      style={{ height: '60vh', width: '100%' }}
+      className="relative rounded-lg overflow-hidden border"
+    >
+      <Image
+        src={mapImage.imageUrl}
+        alt="Static map placeholder"
+        fill
+        className="object-cover"
+        data-ai-hint={mapImage.imageHint}
+      />
+      <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center p-4 text-center">
+        <div className="bg-background/80 p-6 rounded-lg shadow-2xl backdrop-blur-sm max-w-md">
+          <h3 className="text-lg font-bold text-foreground">
+            Static Map Preview
+          </h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            An interactive map requires a Google Maps API key. Please add your
+            key to the <code>.env</code> file to enable live fleet tracking.
+          </p>
+        </div>
       </div>
-    </APIProvider>
+    </div>
   );
 };
 
