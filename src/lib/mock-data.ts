@@ -9,9 +9,9 @@ export const leaderboardData = [
 ];
 
 export const shipmentsData = [
-  { id: 'ZYRH-001', status: 'In Transit', origin: 'New York, NY', destination: 'Los Angeles, CA', eta: 'In 2 days' },
-  { id: 'ZYRH-002', status: 'Delivered', origin: 'Chicago, IL', destination: 'Houston, TX', eta: 'Completed' },
-  { id: 'ZYRH-003', status: 'Pending', origin: 'Miami, FL', destination: 'Seattle, WA', eta: 'N/A' },
-  { id: 'ZYRH-004', status: 'In Transit', origin: 'Denver, CO', destination: 'Boston, MA', eta: 'Tomorrow' },
-  { id: 'ZYRH-005', status: 'Delayed', origin: 'Phoenix, AZ', destination: 'Atlanta, GA', eta: 'In 3 days' },
+  { id: 'ECO-001', status: 'In Transit', origin: 'New York, NY', destination: 'Los Angeles, CA', eta: 'In 2 days' },
+  { id: 'ECO-002', status: 'Delivered', origin: 'Chicago, IL', destination: 'Houston, TX', eta: 'Completed' },
+  { id: 'ECO-003', status: 'Pending', origin: 'Miami, FL', destination: 'Seattle, WA', eta: 'N/A' },
+  { id: 'ECO-004', status: 'In Transit', origin: 'Denver, CO', destination: 'Boston, MA', eta: 'Tomorrow' },
+  { id: 'ECO-005', status: 'Delayed', origin: 'Phoenix, AZ', destination: 'Atlanta, GA', eta: 'In 3 days' },
 ];

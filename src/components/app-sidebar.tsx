@@ -33,7 +33,7 @@ export function AppSidebar() {
       <SidebarHeader>
         <Link href="/dashboard" className="flex items-center gap-2">
           <Leaf className="w-8 h-8 text-primary shrink-0" />
-          <span className="text-xl font-bold text-primary font-headline">ZYRH</span>
+          <span className="text-xl font-bold text-primary font-headline">EcoGo</span>
         </Link>
       </SidebarHeader>
       <SidebarContent>

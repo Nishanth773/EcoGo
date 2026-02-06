@@ -40,7 +40,7 @@ export function LoginForm() {
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Leaf className="w-10 h-10 text-primary" />
-            <h1 className="text-3xl font-bold text-primary font-headline">ZYRH</h1>
+            <h1 className="text-3xl font-bold text-primary font-headline">EcoGo</h1>
           </div>
           <CardTitle className="text-2xl font-headline">Welcome Back</CardTitle>
           <CardDescription>Enter your credentials to access your dashboard.</CardDescription>

@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'ZYRH - Green Logistics',
+  title: 'EcoGo - Green Logistics',
   description: 'Optimizing delivery routes for fuel efficiency and carbon reduction.',
 };
 
