@@ -12,13 +12,12 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Leaf } from 'lucide-react';
+import { Leaf, AlertTriangle } from 'lucide-react';
 import { useFormStatus } from 'react-dom';
 import { useActionState, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth, useUser, initiateEmailSignIn } from '@/firebase';
-import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import { Terminal } from 'lucide-react';
+import { Alert, AlertDescription } from '../ui/alert';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
 function LoginButton() {
@@ -104,8 +103,7 @@ export function LoginForm() {
         <CardContent className="space-y-4">
            {(state?.error || googleError) && (
               <Alert variant="destructive">
-                <Terminal className="h-4 w-4" />
-                <AlertTitle>Authentication Error</AlertTitle>
+                <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>{state?.error || googleError}</AlertDescription>
               </Alert>
             )}
