@@ -11,10 +11,12 @@ Fuel consumption patterns
 The system empowers logistics managers and drivers to make data-driven, sustainable decisions while maintaining operational efficiency.
 
 Key Features
+
 1️⃣ AI-Powered Eco-Routing
 Calculates fuel-efficient routes using real-time traffic and terrain data
 Balances delivery time and carbon emissions
 Suggests the lowest CO₂ impact path
+
 
 2️⃣ Dynamic Sustainability Insights
 Real-time EcoScore calculation
@@ -22,10 +24,12 @@ CO₂ emission per trip, vehicle, and delivery
 Fuel efficiency tracking
 Sustainability analytics dashboard
 
+
 3️⃣ Explainable AI (XAI)
 Uses SHAP and LIME for model interpretability
 Shows why a specific route was selected
 Improves trust and transparency in AI decisions
+
 
 4️⃣ Driver Gamification
 EcoScore leaderboard
@@ -33,13 +37,17 @@ Rewards for fuel-efficient driving
 CO₂ reduction tracking
 Encourages eco-friendly habits
 
+
 5️⃣ Unified Dashboard
 Real-time shipment tracking
 Environmental impact visualization
 Fleet performance monitoring
 Centralized analytics for logistics managers
 
+
+
 Tech Stack
+
 
 Frontend & Mobile
 Flutter – Cross-platform mobile app (Drivers & Customers)
@@ -55,6 +63,8 @@ AWS S3 – Data storage
 AWS Lambda – Serverless functions
 
 
+
+
 AI & Machine Learning
 Optimization Engine
 Dijkstra’s Algorithm
@@ -67,6 +77,8 @@ NLP
 BERT
 Dialogflow (for intelligent user queries)
 
+
+
 System Architecture
 EcoGo follows a modular microservices architecture to ensure scalability and flexibility.
 🔹 Data Input Layer
@@ -75,19 +87,26 @@ Google Maps API
 Weather APIs
 Maritime Traffic APIs
 Vehicle Telematics
+
+
 🔹 Processing Layer
 Route optimization engine
 ML-based fuel & emission prediction models
 Explainability module (SHAP/LIME)
+
+
 🔹 Application Layer
 Driver mobile application
 Customer tracking dashboard
 Fleet management interface
+
+
 🔹 Output Layer
 Eco-optimized route suggestions
 CO₂ emission analytics
 EcoScore rankings
 Driver notifications
+
 
 
 Problem Statement
