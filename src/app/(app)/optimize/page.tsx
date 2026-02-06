@@ -1,6 +1,6 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useFormStatus } from 'react-dom';
 import { getOptimizedRoute } from './actions';
 import type { FormState } from './actions';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useEffect } from 'react';
+import { useActionState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal, Bot, Route as RouteIcon, Fuel, Wind, Clock } from 'lucide-react';
@@ -27,7 +27,7 @@ function SubmitButton() {
 }
 
 export default function OptimizePage() {
-  const [state, formAction] = useFormState(getOptimizedRoute, initialState);
+  const [state, formAction] = useActionState(getOptimizedRoute, initialState);
   const { toast } = useToast();
 
   useEffect(() => {

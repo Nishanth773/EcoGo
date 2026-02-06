@@ -13,9 +13,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Leaf } from 'lucide-react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useFormStatus } from 'react-dom';
+import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 
 function LoginButton() {
   const { pending } = useFormStatus();
@@ -28,7 +28,7 @@ function LoginButton() {
 
 export function LoginForm() {
   const router = useRouter();
-  const [_, formAction] = useFormState(async () => {
+  const [_, formAction] = useActionState(async () => {
     // This is a placeholder for actual authentication logic.
     // On successful authentication, you would redirect the user.
     router.push('/dashboard');
