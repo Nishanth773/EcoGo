@@ -35,12 +35,6 @@
       "description": "Avatar for the fifth driver on the leaderboard.",
       "imageUrl": "https://images.unsplash.com/flagged/photo-1595514191830-3e96a518989b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cGVyc29uJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzcwMzM2Mzc5fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "person portrait"
-    },
-    {
-      "id": "static-map",
-      "description": "A static map image to be used as a placeholder when no API key is available.",
-      "imageUrl": "https://images.unsplash.com/photo-1712150177656-b3c0bd50eb25?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHx3b3JsZCUyMG1hcHxlbnwwfHx8fDE3NzAyODk4NTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "world map"
     }
   ]
 }

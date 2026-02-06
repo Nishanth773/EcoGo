@@ -1,5 +1,13 @@
-import MapComponent from '@/components/map';
+'use client';
+
+import dynamic from 'next/dynamic';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const Map = dynamic(() => import('@/components/map'), {
+  ssr: false,
+  loading: () => <Skeleton className="h-[60vh] w-full" />,
+});
 
 export default function MapPage() {
   return (
@@ -14,11 +22,11 @@ export default function MapPage() {
         <CardHeader>
           <CardTitle>Fleet Location</CardTitle>
           <CardDescription>
-            A preview of the fleet map is shown below. Add an API key for live data.
+            An interactive map showing the current location of your fleet.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <MapComponent />
+          <Map />
         </CardContent>
       </Card>
     </div>
