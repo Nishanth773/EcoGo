@@ -1,57 +1,77 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import MapContainer from '../components/MapContainer';
 import RouteComparison from '../components/RouteComparison';
 import { useTelemetry } from '../hooks/useTelemetry';
+import { useApp } from '../context/AppContext';
 import { fetchOSRMRoute, buildComparisonManifest } from '../services/routingService';
 import { Leaf as LeafIcon, Navigation2, Zap, AlertTriangle, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function DriverDashboard() {
+  const { currentUser, broadcastTelemetry, broadcastRouteStarted, broadcastRouteEnded } = useApp();
   const [activeRoute, setActiveRoute] = useState(null);
-
-  // Map data: origin, destination, fetched routes
   const [origin, setOrigin] = useState(null);
   const [destination, setDestination] = useState(null);
   const [routes, setRoutes] = useState(null);
   const [routeLoading, setRouteLoading] = useState(false);
-
-  // 'origin' | 'destination' | false
   const [clickMode, setClickMode] = useState(false);
 
   const isDriving = !!activeRoute;
   const { speed, idleTime, alerts, ecoScore } = useTelemetry(isDriving);
 
-  // Auto-fetch route when both origin and destination are set
-  const fetchRoute = useCallback(async (o, d) => {
+  // Broadcast telemetry to manager in real time
+  useEffect(() => {
+    if (!isDriving || !currentUser) return;
+    const driverId = currentUser.id;
+
+    // Mock position drift along route for manager map visibility
+    broadcastTelemetry({
+      driverId,
+      name: currentUser.name,
+      avatar: currentUser.avatar,
+      speed,
+      ecoScore,
+      idleTime,
+      alerts,
+      routeName: activeRoute?.name || '',
+      distanceKm: activeRoute?.distanceKm || '',
+      co2Rate: speed * 1.65, // simulated g/km * speed
+      status: speed === 0 ? 'Idle' : 'Driving',
+    });
+  }, [speed, ecoScore, isDriving]);
+
+  const fetchRoute = async (o, d) => {
     setRouteLoading(true);
     try {
-      const baseRoute = await fetchOSRMRoute(o, d);
-      const manifest = buildComparisonManifest(baseRoute);
+      const base = await fetchOSRMRoute(o, d);
+      const manifest = buildComparisonManifest(base);
       setRoutes(manifest);
     } catch (e) {
-      console.error('Could not compute route', e);
+      console.error(e);
     } finally {
       setRouteLoading(false);
     }
-  }, []);
+  };
 
-  // Called when user clicks on map (in click mode)
-  const handleLocationPicked = useCallback((snappedCoord) => {
+  const handleLocationPicked = (snappedCoord) => {
     if (clickMode === 'origin') {
       setOrigin(snappedCoord);
       setRoutes(null);
-      setClickMode('destination'); // automatically switch to next step
+      setClickMode('destination');
     } else if (clickMode === 'destination') {
       setDestination(snappedCoord);
-      setClickMode(false); // exit click mode
-      // Auto-fetch route with the new destination
+      setClickMode(false);
       fetchRoute(origin, snappedCoord);
     }
-  }, [clickMode, origin, fetchRoute]);
+  };
 
-  const handleStartRoute = (route) => setActiveRoute(route);
+  const handleStartRoute = (route) => {
+    setActiveRoute(route);
+    if (currentUser) broadcastRouteStarted(currentUser.id, route);
+  };
 
   const handleReset = () => {
+    if (currentUser && activeRoute) broadcastRouteEnded(currentUser.id);
     setActiveRoute(null);
     setOrigin(null);
     setDestination(null);
@@ -59,7 +79,6 @@ export default function DriverDashboard() {
     setClickMode(false);
   };
 
-  // Routes fetched from the dropdown-based RouteComparison
   const handleRoutesFetched = ({ origin: o, destination: d, routes: r }) => {
     setOrigin(o);
     setDestination(d);
@@ -69,13 +88,10 @@ export default function DriverDashboard() {
 
   const activeWaypoints = activeRoute?.waypoints ?? null;
   const activeColor = activeRoute?.id === 'route-fast' ? '#3B82F6'
-    : activeRoute?.id === 'route-short' ? '#94A3B8'
-    : '#10B981';
+    : activeRoute?.id === 'route-short' ? '#94A3B8' : '#10B981';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100%', overflow: 'hidden', position: 'relative' }}>
-
-      {/* Background Map with click support */}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', overflow: 'hidden', position: 'relative' }}>
       <MapContainer
         origin={origin}
         destination={destination}
@@ -103,7 +119,7 @@ export default function DriverDashboard() {
               clickMode={clickMode}
               onSelectRoute={handleStartRoute}
               onRoutesFetched={handleRoutesFetched}
-              onClickMode={(mode) => setClickMode(mode)}
+              onClickMode={setClickMode}
               onReset={handleReset}
             />
           </motion.div>
@@ -143,11 +159,8 @@ export default function DriverDashboard() {
                   </div>
                   <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', margin: 0 }}>Est. Fuel</p>
                 </div>
-                <button
-                  onClick={handleReset}
-                  title="End Route"
-                  style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '10px', padding: '8px', cursor: 'pointer', color: 'white' }}
-                >
+                <button onClick={handleReset} title="End Route"
+                  style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '10px', padding: '8px', cursor: 'pointer', color: 'white' }}>
                   <RotateCcw size={20} />
                 </button>
               </div>
