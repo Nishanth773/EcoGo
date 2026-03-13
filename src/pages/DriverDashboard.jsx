@@ -1,50 +1,93 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import MapContainer from '../components/MapContainer';
 import RouteComparison from '../components/RouteComparison';
 import { useTelemetry } from '../hooks/useTelemetry';
+import { fetchOSRMRoute, buildComparisonManifest } from '../services/routingService';
 import { Leaf as LeafIcon, Navigation2, Zap, AlertTriangle, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function DriverDashboard() {
   const [activeRoute, setActiveRoute] = useState(null);
-  const [mapData, setMapData] = useState({ origin: null, destination: null, routes: null });
+
+  // Map data: origin, destination, fetched routes
+  const [origin, setOrigin] = useState(null);
+  const [destination, setDestination] = useState(null);
+  const [routes, setRoutes] = useState(null);
+  const [routeLoading, setRouteLoading] = useState(false);
+
+  // 'origin' | 'destination' | false
+  const [clickMode, setClickMode] = useState(false);
 
   const isDriving = !!activeRoute;
   const { speed, idleTime, alerts, ecoScore } = useTelemetry(isDriving);
 
-  // Called when user calculates routes in RouteComparison
-  const handleRoutesFetched = ({ origin, destination, routes }) => {
-    setMapData({ origin, destination, routes });
-  };
+  // Auto-fetch route when both origin and destination are set
+  const fetchRoute = useCallback(async (o, d) => {
+    setRouteLoading(true);
+    try {
+      const baseRoute = await fetchOSRMRoute(o, d);
+      const manifest = buildComparisonManifest(baseRoute);
+      setRoutes(manifest);
+    } catch (e) {
+      console.error('Could not compute route', e);
+    } finally {
+      setRouteLoading(false);
+    }
+  }, []);
 
-  // Called when user clicks "Start Eco Drive"
-  const handleStartRoute = (route) => {
-    setActiveRoute(route);
-  };
+  // Called when user clicks on map (in click mode)
+  const handleLocationPicked = useCallback((snappedCoord) => {
+    if (clickMode === 'origin') {
+      setOrigin(snappedCoord);
+      setRoutes(null);
+      setClickMode('destination'); // automatically switch to next step
+    } else if (clickMode === 'destination') {
+      setDestination(snappedCoord);
+      setClickMode(false); // exit click mode
+      // Auto-fetch route with the new destination
+      fetchRoute(origin, snappedCoord);
+    }
+  }, [clickMode, origin, fetchRoute]);
+
+  const handleStartRoute = (route) => setActiveRoute(route);
 
   const handleReset = () => {
     setActiveRoute(null);
+    setOrigin(null);
+    setDestination(null);
+    setRoutes(null);
+    setClickMode(false);
   };
 
-  // Gets the currently selected route's waypoints and color for the map
-  const activeWaypoints = activeRoute?.waypoints ?? mapData.routes?.eco?.waypoints ?? null;
-  const activeColor = activeRoute?.color?.startsWith('var(') ? '#10B981' : (activeRoute?.color || '#10B981');
+  // Routes fetched from the dropdown-based RouteComparison
+  const handleRoutesFetched = ({ origin: o, destination: d, routes: r }) => {
+    setOrigin(o);
+    setDestination(d);
+    setRoutes(r);
+    setClickMode(false);
+  };
+
+  const activeWaypoints = activeRoute?.waypoints ?? null;
+  const activeColor = activeRoute?.id === 'route-fast' ? '#3B82F6'
+    : activeRoute?.id === 'route-short' ? '#94A3B8'
+    : '#10B981';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100%', overflow: 'hidden', position: 'relative' }}>
 
-      {/* Background Map */}
+      {/* Background Map with click support */}
       <MapContainer
-        origin={mapData.origin}
-        destination={mapData.destination}
+        origin={origin}
+        destination={destination}
         routeWaypoints={activeWaypoints}
         activeRouteColor={activeColor}
         isDriving={isDriving && speed > 0}
+        clickMode={clickMode}
+        onLocationPicked={handleLocationPicked}
       />
 
       <AnimatePresence mode="wait">
         {!activeRoute ? (
-          /* Route Selection Overlay */
           <motion.div
             key="route-selection"
             initial={{ y: 100, opacity: 0 }}
@@ -53,32 +96,38 @@ export default function DriverDashboard() {
             style={{ position: 'absolute', bottom: '20px', left: '20px', right: '20px', zIndex: 10 }}
           >
             <RouteComparison
+              origin={origin}
+              destination={destination}
+              routes={routes}
+              routeLoading={routeLoading}
+              clickMode={clickMode}
               onSelectRoute={handleStartRoute}
               onRoutesFetched={handleRoutesFetched}
+              onClickMode={(mode) => setClickMode(mode)}
+              onReset={handleReset}
             />
           </motion.div>
         ) : (
-          /* Active Driver HUD */
           <motion.div
             key="driver-hud"
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             style={{ position: 'absolute', top: '20px', left: '20px', right: '20px', display: 'flex', flexDirection: 'column', gap: '14px', zIndex: 10 }}
           >
-            {/* Top Status Bar */}
             <div className="glass-panel" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                 <div style={{ background: 'var(--color-primary-glow)', padding: '12px', borderRadius: '12px' }}>
                   <Navigation2 color="var(--color-primary)" size={30} />
                 </div>
                 <div>
-                  <h2 style={{ fontSize: '1.6rem', fontWeight: 700, margin: 0 }}>{speed} <span style={{ fontSize: '1rem', fontWeight: 400 }}>km/h</span></h2>
+                  <h2 style={{ fontSize: '1.6rem', fontWeight: 700, margin: 0 }}>
+                    {speed} <span style={{ fontSize: '1rem', fontWeight: 400 }}>km/h</span>
+                  </h2>
                   <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', margin: 0 }}>
                     {idleTime > 0 ? `⚠️ Idling: ${idleTime}s` : `${activeRoute.name} · ${activeRoute.distanceKm} km`}
                   </p>
                 </div>
               </div>
-
               <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: ecoScore > 80 ? 'var(--color-primary)' : 'var(--color-warning)' }}>
@@ -104,7 +153,6 @@ export default function DriverDashboard() {
               </div>
             </div>
 
-            {/* Driving Alerts */}
             <AnimatePresence>
               {alerts.length > 0 && (
                 <motion.div
@@ -112,12 +160,7 @@ export default function DriverDashboard() {
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.9, opacity: 0 }}
                   className="glass-panel"
-                  style={{
-                    background: 'rgba(239, 68, 68, 0.15)',
-                    border: '1px solid rgba(239, 68, 68, 0.5)',
-                    padding: '14px 20px',
-                    display: 'flex', alignItems: 'center', gap: '12px',
-                  }}
+                  style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.5)', padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '12px' }}
                 >
                   <AlertTriangle size={22} color="var(--color-danger)" />
                   <span style={{ fontWeight: 600, color: '#fca5a5', fontSize: '1rem' }}>{alerts[alerts.length - 1]}</span>
