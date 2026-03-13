@@ -20,20 +20,12 @@ function AppShell() {
   return (
     <div className="app-container">
       {currentUser && <NavBar />}
-      <div style={{ paddingTop: currentUser ? '56px' : '0', height: '100vh' }}>
+      <div style={{ height: '100%', overflow: 'hidden' }}>
         <Routes>
           <Route path="/login" element={currentUser ? <Navigate to={`/${currentUser.role}`} replace /> : <LoginPage />} />
           <Route path="/" element={<Navigate to={currentUser ? `/${currentUser.role}` : '/login'} replace />} />
-          <Route path="/driver" element={
-            <ProtectedRoute>
-              <DriverDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/manager" element={
-            <ProtectedRoute allowedRole="manager">
-              <ManagerDashboard />
-            </ProtectedRoute>
-          } />
+          <Route path="/driver" element={<ProtectedRoute><DriverDashboard /></ProtectedRoute>} />
+          <Route path="/manager" element={<ProtectedRoute allowedRole="manager"><ManagerDashboard /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </div>

@@ -1,6 +1,15 @@
 .app-container {
   width: 100%;
-  height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
+
+/* Offset for the top navbar on desktop */
+@media (min-width: 768px) {
+  .app-container > div {
+    padding-top: var(--nav-top);
+  }
+}
+

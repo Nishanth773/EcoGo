@@ -1,82 +1,224 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
+/* ── Design Tokens ─────────────────────────────────────────────────────── */
 :root {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
   color-scheme: dark;
-  background-color: #0B0F19; /* Deep dark slate */
-  color: #F8FAFC;
 
-  /* EcoGo Color Palette */
   --color-bg: #0B0F19;
-  --color-surface: #1E293B; /* Lighter surface for cards */
-  --color-surface-glass: rgba(30, 41, 59, 0.7);
+  --color-surface: #1E293B;
+  --color-surface-glass: rgba(30, 41, 59, 0.82);
   --color-surface-hover: #334155;
-  
-  --color-primary: #10B981; /* Vibrant emerald green */
+
+  --color-primary: #10B981;
   --color-primary-dark: #059669;
   --color-primary-light: #34D399;
   --color-primary-glow: rgba(16, 185, 129, 0.2);
-  
-  --color-accent: #3B82F6; /* Blue for 'Fastest' route */
-  --color-warning: #F59E0B; /* Orange for idle/alerts */
-  --color-danger: #EF4444; /* Red for harsh acceleration */
-  
+
+  --color-accent: #3B82F6;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+
   --color-text: #F8FAFC;
   --color-text-muted: #94A3B8;
-  
+
+  /* Spacing tokens (mobile-first) */
+  --space-xs: 6px;
+  --space-sm: 10px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* Nav heights */
+  --nav-top: 52px;        /* top navbar */
+  --nav-bottom: 64px;     /* mobile bottom tab bar */
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* ── Reset ─────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { height: 100%; overflow: hidden; }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  min-height: 100%;
+  height: 100%;
   background-color: var(--color-bg);
   color: var(--color-text);
+  /* Prevent rubber-band scroll on iOS */
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 #root {
   width: 100%;
-  height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
 
-/* Glassmorphism Utilities */
+/* ── Glassmorphism Panel ───────────────────────────────────────────────── */
 .glass-panel {
   background: var(--color-surface-glass);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
+/* ── App Container ─────────────────────────────────────────────────────── */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  position: relative;
 }
-::-webkit-scrollbar-track {
-  background: var(--color-surface); 
+
+/* ── Scrollable Dashboard Content ─────────────────────────────────────── */
+.dashboard-scroll {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  flex: 1;
 }
-::-webkit-scrollbar-thumb {
-  background: #475569; 
-  border-radius: 4px;
+
+/* ── Responsive Grid: stacked on mobile, grid on desktop ──────────────── */
+.responsive-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #64748B; 
+@media (min-width: 640px) {
+  .responsive-grid { grid-template-columns: repeat(2, 1fr); }
 }
+@media (min-width: 1024px) {
+  .responsive-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ── KPI Cards Grid ────────────────────────────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-sm);
+}
+@media (min-width: 768px) {
+  .kpi-grid { grid-template-columns: repeat(3, 1fr); gap: var(--space-md); }
+}
+@media (min-width: 1200px) {
+  .kpi-grid { grid-template-columns: repeat(5, 1fr); }
+}
+
+/* ── Two-column content layout (stacks on mobile) ─────────────────────── */
+.content-split {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+@media (min-width: 900px) {
+  .content-split { flex-direction: row; }
+}
+
+/* ── Touch-friendly interactive elements ───────────────────────────────── */
+button, select, input {
+  touch-action: manipulation; /* removes 300ms tap delay */
+  -webkit-tap-highlight-color: transparent;
+  min-height: 44px; /* Apple HIG minimum touch target */
+  font-family: inherit;
+}
+
+/* ── Bottom Navigation Bar (mobile) ────────────────────────────────────── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--nav-bottom);
+  background: rgba(10, 14, 20, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 900;
+  padding-bottom: env(safe-area-inset-bottom); /* iPhone notch */
+}
+/* Hide bottom nav on desktop (top nav handles it) */
+@media (min-width: 768px) {
+  .bottom-nav { display: none; }
+}
+
+/* ── Top NavBar hide on mobile, bottom-nav takes over ─────────────────── */
+.top-nav-desktop-only {
+  display: none;
+}
+@media (min-width: 768px) {
+  .top-nav-desktop-only { display: flex; }
+}
+
+/* ── Page content offset for navbars ───────────────────────────────────── */
+.page-with-bottom-nav {
+  padding-bottom: calc(var(--nav-bottom) + env(safe-area-inset-bottom));
+}
+@media (min-width: 768px) {
+  .page-with-bottom-nav { padding-bottom: 0; }
+}
+
+/* ── Map container full-screen ─────────────────────────────────────────── */
+.map-fullscreen {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+}
+
+/* ── Compact HUD overlay on mobile ─────────────────────────────────────── */
+.hud-overlay {
+  position: absolute;
+  top: 8px; left: 8px; right: 8px;
+  z-index: 10;
+}
+@media (min-width: 768px) {
+  .hud-overlay { top: 20px; left: 20px; right: 20px; }
+}
+
+/* ── Route panel on mobile: bottom sheet ───────────────────────────────── */
+.route-panel-mobile {
+  position: absolute;
+  bottom: calc(var(--nav-bottom) + 8px);
+  left: 8px; right: 8px;
+  z-index: 10;
+  max-height: 65vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+@media (min-width: 768px) {
+  .route-panel-mobile {
+    bottom: 20px;
+    left: 20px; right: 20px;
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+
+/* ── Typography scaling ─────────────────────────────────────────────────── */
+.text-display { font-size: clamp(1.5rem, 5vw, 2.5rem); font-weight: 800; }
+.text-title   { font-size: clamp(1rem, 3vw, 1.5rem); font-weight: 700; }
+.text-body    { font-size: clamp(0.82rem, 2vw, 0.95rem); }
+.text-small   { font-size: clamp(0.72rem, 1.8vw, 0.82rem); }
+
+/* ── Scrollbar ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+
+/* ── Leaflet overrides ──────────────────────────────────────────────────── */
+.leaflet-container { touch-action: pan-x pan-y; }
+.leaflet-touch .leaflet-bar a { width: 36px; height: 36px; line-height: 36px; }
