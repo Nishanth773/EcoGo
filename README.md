@@ -1,7 +1,10 @@
-Purpose of EcoGo
+EcoGo
+
+
 The purpose of this system is to develop a sustainable logistics routing application that helps fleet operators, logistics companies, and commercial drivers reduce fuel consumption, CO₂ emissions, and operational costs. The system uses intelligent route optimization, AI-based monitoring, eco-driving assistance, and sustainability metrics to promote environmentally friendly freight movement
 
 Scope
+
 The EcoRoute application will provide:
 
 Smart route optimization based on environmental, topographical, and operational factors
