@@ -87,7 +87,7 @@ The system must track unnecessary engine idling, a major source of fuel waste at
 
 Features: Detect exact idle durations, calculate the exact volume of fuel wasted, and prompt drivers to cut the engine during prolonged stops
 
-Non-Functional Requirements
+## Non-Functional Requirements:
 
 Performance: The system should generate complex route recommendations within 2–3 seconds of a query.
 
